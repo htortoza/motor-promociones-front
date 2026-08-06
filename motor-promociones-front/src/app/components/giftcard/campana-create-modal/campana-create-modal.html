@@ -1,0 +1,20 @@
+<p-dialog [(visible)]="visible" [modal]="true" [closable]="true" header="Crear campaña" [style]="{ width: '420px' }" (onHide)="cerrar()">
+  <div class="modal-body">
+    <div class="campo-grupo">
+      <label class="campo-etiqueta" for="campana-nombre">Nombre de la campaña</label>
+      <input pInputText id="campana-nombre" type="text" placeholder="Ej. Campaña Invierno" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" />
+    </div>
+
+    <div class="campo-grupo">
+      <label class="campo-etiqueta" for="campana-inicio">Vigencia desde</label>
+      <p-datepicker inputId="campana-inicio" dateFormat="dd/mm/yy" appendTo="body" [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" [fluid]="true" />
+    </div>
+
+    <div class="campo-grupo">
+      <label class="campo-etiqueta" for="campana-fin">Vigencia hasta</label>
+      <p-datepicker inputId="campana-fin" dateFormat="dd/mm/yy" appendTo="body" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" [fluid]="true" />
+    </div>
+
+    <p-button label="Crear campaña" [disabled]="!puedeConfirmar()" (onClick)="confirmar()" />
+  </div>
+</p-dialog>

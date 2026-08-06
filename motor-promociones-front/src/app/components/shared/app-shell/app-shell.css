@@ -1,0 +1,88 @@
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.shell-nav {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-right: 1px solid var(--p-content-border-color);
+  background: var(--p-surface-0);
+}
+
+.empresa-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.empresa-cargando {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.modulos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modulo-titulo {
+  padding: 0 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--p-text-muted-color);
+}
+
+.modulo-titulo--deshabilitado {
+  opacity: 0.6;
+}
+
+.modulo-nota {
+  margin: 0 0 4px;
+  padding: 0 10px;
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.submodulo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 8px 20px;
+  border-radius: var(--p-border-radius-md, 6px);
+  color: var(--p-text-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.submodulo-item:hover {
+  background: var(--p-surface-50);
+}
+
+.submodulo-activo {
+  background: var(--p-primary-50, var(--p-surface-100));
+  color: var(--p-primary-color);
+  font-weight: 500;
+}
+
+.submodulo-item--deshabilitado {
+  color: var(--p-text-muted-color);
+  cursor: default;
+}
+
+.submodulo-etiqueta-estado {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: var(--p-text-muted-color);
+}
+
+.shell-contenido {
+  flex: 1 1 auto;
+  min-width: 0;
+}
