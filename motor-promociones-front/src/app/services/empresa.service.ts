@@ -3,15 +3,17 @@ import { Empresa } from '../data/giftcard.model';
 import { Modulo } from '../data/shell.model';
 
 const MOCK_EMPRESAS: Empresa[] = [
-  { id: 'empresa-1', nombre: 'Italmod' },
-  { id: 'empresa-2', nombre: 'Autoplanet' },
+  { id: 'empresa-1', nombre: 'Italmod', holdingId: null },
+  { id: 'empresa-1a', nombre: 'Italmod Providencia', holdingId: 'empresa-1' },
+  { id: 'empresa-1b', nombre: 'Italmod Ñuñoa', holdingId: 'empresa-1' },
+  { id: 'empresa-2', nombre: 'Autoplanet', holdingId: null },
 ];
 
 /** Motor de Promociones es el único módulo raíz — Giftcards es una parte de él, no un módulo paralelo. */
 const MOTOR_PROMOCIONES: Modulo = {
   clave: 'motor-promociones',
   etiqueta: 'Motor de Promociones',
-  empresasHabilitadas: ['empresa-1'],
+  empresasHabilitadas: ['empresa-1', 'empresa-1a', 'empresa-1b'],
   submodulos: [
     { clave: 'giftcards', etiqueta: 'Giftcards', icono: 'pi pi-credit-card', ruta: '/giftcards', implementado: true },
     { clave: 'promociones', etiqueta: 'Promociones', icono: 'pi pi-percentage', ruta: '/promociones', implementado: false },

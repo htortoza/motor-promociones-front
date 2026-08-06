@@ -42,6 +42,8 @@ export function calcularEstadoGiftcard(giftcard: Pick<Giftcard, 'vigente' | 'fec
 export interface Empresa {
   id: string;
   nombre: string;
+  /** null = holding (o empresa standalone sin tiendas); si tiene valor, es una tienda de ese holding. */
+  holdingId: string | null;
 }
 
 /** Agrupa códigos de giftcard bajo una campaña con vigencia propia (ej. "Campaña Invierno"). */
