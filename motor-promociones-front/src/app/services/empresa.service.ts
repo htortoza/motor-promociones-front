@@ -1,6 +1,7 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Empresa } from '../data/giftcard.model';
 import { Modulo } from '../data/shell.model';
+import { SesionService } from './sesion.service';
 
 const MOCK_EMPRESAS: Empresa[] = [
   { id: 'empresa-1', nombre: 'Italmod', holdingId: null },
@@ -22,6 +23,7 @@ const MOTOR_PROMOCIONES: Modulo = {
 
 @Injectable({ providedIn: 'root' })
 export class EmpresaService {
+  private readonly sesionService = inject(SesionService);
   private readonly _empresas = signal<Empresa[]>(MOCK_EMPRESAS);
   private readonly _empresaActivaId = signal<string>(MOCK_EMPRESAS[0].id);
   private readonly _cambiandoContexto = signal(false);
@@ -30,9 +32,48 @@ export class EmpresaService {
   readonly cambiandoContexto = this._cambiandoContexto.asReadonly();
   readonly modulo = MOTOR_PROMOCIONES;
 
-  readonly empresaActiva = computed(() => this._empresas().find((e) => e.id === this._empresaActivaId())!);
+  /** Empresas que la sesión activa puede seleccionar, según su rol y alcance. */
+  readonly empresasVisibles = computed<Empresa[]>(() => {
+    const rol = this.sesionService.rol();
+    const empresaId = this.sesionService.empresaId();
+    const todas = this._empresas();
 
-  readonly moduloHabilitadoParaEmpresa = computed(() => this.modulo.empresasHabilitadas.includes(this.empresaActiva().id));
+    if (rol === 'master') return todas;
+    if (rol === 'comprador-externo') return [];
+    if (!empresaId) return [];
+
+    if (rol === 'administrador-holding') {
+      const holding = todas.find((e) => e.id === empresaId);
+      if (!holding) return [];
+      return [holding, ...todas.filter((e) => e.holdingId === holding.id)];
+    }
+
+    // administrador-tienda / usuario-pos: acotado a su propia tienda.
+    const propia = todas.find((e) => e.id === empresaId);
+    return propia ? [propia] : [];
+  });
+
+  readonly empresaActiva = computed<Empresa | null>(() => {
+    const visibles = this.empresasVisibles();
+    if (visibles.length === 0) return null;
+    const activaId = this._empresaActivaId();
+    return visibles.find((e) => e.id === activaId) ?? visibles[0];
+  });
+
+  readonly moduloHabilitadoParaEmpresa = computed(() => {
+    const activa = this.empresaActiva();
+    return activa !== null && this.modulo.empresasHabilitadas.includes(activa.id);
+  });
+
+  /** Empresas incluidas en la vista actual: agregado (holding + tiendas) si la activa es un holding, acotado a una sola tienda si no. */
+  readonly empresasIncluidasEnVistaActiva = computed<string[]>(() => {
+    const activa = this.empresaActiva();
+    if (!activa) return [];
+    if (activa.holdingId === null) {
+      return [activa.id, ...this._empresas().filter((e) => e.holdingId === activa.id).map((e) => e.id)];
+    }
+    return [activa.id];
+  });
 
   cambiarEmpresa(empresaId: string): void {
     this._cambiandoContexto.set(true);
