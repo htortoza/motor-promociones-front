@@ -9,9 +9,7 @@ import {
   calcularEstadoGiftcard,
 } from '../data/giftcard.model';
 import { EmpresaService } from './empresa.service';
-
-// No hay sistema de autenticación aún — se simula el usuario que ejecuta acciones desde el BackOffice.
-const USUARIO_ACTUAL = 'Administrador';
+import { SesionService } from './sesion.service';
 
 const MOCK_GIFTCARDS: Giftcard[] = [
   {
@@ -124,10 +122,14 @@ const MOCK_GIFTCARDS: Giftcard[] = [
 @Injectable({ providedIn: 'root' })
 export class GiftcardService {
   private readonly empresaService = inject(EmpresaService);
+  private readonly sesionService = inject(SesionService);
   private readonly _giftcards = signal<Giftcard[]>(MOCK_GIFTCARDS);
   private secuencia = MOCK_GIFTCARDS.length;
 
-  readonly giftcardsDeEmpresaActiva = computed(() => this._giftcards().filter((g) => g.empresaId === this.empresaService.empresaActiva().id));
+  readonly giftcardsDeEmpresaActiva = computed(() => {
+    const idsIncluidos = this.empresaService.empresasIncluidasEnVistaActiva();
+    return this._giftcards().filter((g) => idsIncluidos.includes(g.empresaId));
+  });
 
   readonly metricas = computed(() => {
     const lista = this.giftcardsDeEmpresaActiva();
@@ -141,6 +143,9 @@ export class GiftcardService {
   });
 
   crear(payload: CrearGiftcardPayload): void {
+    const empresaActiva = this.empresaService.empresaActiva();
+    if (!empresaActiva) return;
+
     const monto = payload.tipoMonto === 'fijo' ? (payload.montoFijo ?? 0) : 0;
     const cantidad = payload.modo === 'lote' ? payload.cantidad : 1;
     // Monto dinámico se asigna al activar — nunca puede nacer ya activada.
@@ -148,7 +153,8 @@ export class GiftcardService {
     const prefijo = generarPrefijoCodigo();
     const hoy = new Date().toISOString().slice(0, 10);
     const campanaId = payload.modo === 'lote' ? payload.campanaId : null;
-    const empresaId = this.empresaService.empresaActiva().id;
+    const empresaId = empresaActiva.id;
+    const usuario = this.sesionService.nombreUsuarioActual();
 
     const nuevas: Giftcard[] = Array.from({ length: cantidad }, (_, indice) => {
       this.secuencia += 1;
@@ -174,7 +180,7 @@ export class GiftcardService {
             monto,
             saldoResultante: monto,
             detalle: payload.modo === 'lote' ? 'Generada en campaña corporativa' : 'Creada individual',
-            usuario: USUARIO_ACTUAL,
+            usuario,
           },
         ],
       };
@@ -187,6 +193,7 @@ export class GiftcardService {
     this.secuencia += 1;
     const nuevoSid = `SID-${10000 + this.secuencia}`;
     const hoy = new Date().toISOString().slice(0, 10);
+    const usuario = this.sesionService.nombreUsuarioActual();
 
     this._giftcards.update((lista) =>
       lista.map((g) => {
@@ -201,7 +208,7 @@ export class GiftcardService {
           sid: nuevoSid,
           movimientos: [
             ...g.movimientos,
-            { sid: nuevoSid, tipo: 'venta', fecha: hoy, monto, saldoResultante: monto, detalle: `Activada para ${payload.destinatario}`, usuario: USUARIO_ACTUAL },
+            { sid: nuevoSid, tipo: 'venta', fecha: hoy, monto, saldoResultante: monto, detalle: `Activada para ${payload.destinatario}`, usuario },
           ],
         };
       }),
@@ -212,6 +219,7 @@ export class GiftcardService {
     this.secuencia += 1;
     const nuevoSid = `SID-${10000 + this.secuencia}`;
     const hoy = new Date().toISOString().slice(0, 10);
+    const usuario = this.sesionService.nombreUsuarioActual();
 
     this._giftcards.update((lista) =>
       lista.map((g) =>
@@ -222,7 +230,7 @@ export class GiftcardService {
               sid: nuevoSid,
               movimientos: [
                 ...g.movimientos,
-                { sid: nuevoSid, tipo: 'ajuste', fecha: hoy, monto: 0, saldoResultante: g.saldo, detalle: `Bloqueada — ${payload.motivo}`, usuario: USUARIO_ACTUAL },
+                { sid: nuevoSid, tipo: 'ajuste', fecha: hoy, monto: 0, saldoResultante: g.saldo, detalle: `Bloqueada — ${payload.motivo}`, usuario },
               ],
             }
           : g,
@@ -234,6 +242,7 @@ export class GiftcardService {
     this.secuencia += 1;
     const nuevoSid = `SID-${10000 + this.secuencia}`;
     const hoy = new Date().toISOString().slice(0, 10);
+    const usuario = this.sesionService.nombreUsuarioActual();
 
     this._giftcards.update((lista) =>
       lista.map((g) =>
@@ -253,7 +262,7 @@ export class GiftcardService {
                   monto: 0,
                   saldoResultante: g.monto,
                   detalle: 'Activación reiniciada — código vuelve a Sin activar',
-                  usuario: USUARIO_ACTUAL,
+                  usuario,
                 },
               ],
             }

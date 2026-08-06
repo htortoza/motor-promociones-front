@@ -14,7 +14,10 @@ export class CampanaService {
   private readonly _campanas = signal<Campana[]>(MOCK_CAMPANAS);
   private secuencia = MOCK_CAMPANAS.length;
 
-  readonly campanasDeEmpresaActiva = computed(() => this._campanas().filter((c) => c.empresaId === this.empresaService.empresaActiva().id));
+  readonly campanasDeEmpresaActiva = computed(() => {
+    const idsIncluidos = this.empresaService.empresasIncluidasEnVistaActiva();
+    return this._campanas().filter((c) => idsIncluidos.includes(c.empresaId));
+  });
 
   readonly estadisticas = computed<EstadisticasCampana[]>(() => {
     const giftcards = this.giftcardService.giftcardsDeEmpresaActiva();
@@ -54,10 +57,13 @@ export class CampanaService {
   }
 
   crear(payload: CrearCampanaPayload): void {
+    const empresaActiva = this.empresaService.empresaActiva();
+    if (!empresaActiva) return;
+
     this.secuencia += 1;
     const campana: Campana = {
       id: `campana-${this.secuencia}`,
-      empresaId: this.empresaService.empresaActiva().id,
+      empresaId: empresaActiva.id,
       archivada: false,
       fechaCreacion: new Date().toISOString().slice(0, 10),
       ...payload,
