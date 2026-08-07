@@ -1,45 +1,56 @@
 <div class="shell">
   <aside class="shell-nav">
-    <div class="empresa-selector">
-      <p-select
-        [options]="empresaService.empresas()"
-        optionLabel="nombre"
-        optionValue="id"
-        [ngModel]="empresaService.empresaActiva().id"
-        (ngModelChange)="empresaService.cambiarEmpresa($event)"
-        [fluid]="true"
-      />
-      @if (empresaService.cambiandoContexto()) {
-        <span class="empresa-cargando">Cargando módulos disponibles…</span>
-      }
-    </div>
+    <app-sesion-switcher />
 
-    <nav class="modulos-lista">
-      <div class="modulo-titulo" [class.modulo-titulo--deshabilitado]="!empresaService.moduloHabilitadoParaEmpresa()">
-        {{ empresaService.modulo.etiqueta }}
+    @if (!sesionService.esCompradorExterno()) {
+      <div class="empresa-selector">
+        <p-select
+          [options]="empresaService.empresasVisibles()"
+          optionLabel="nombre"
+          optionValue="id"
+          [ngModel]="empresaService.empresaActiva()?.id"
+          (ngModelChange)="empresaService.cambiarEmpresa($event)"
+          [fluid]="true"
+        />
+        @if (empresaService.cambiandoContexto()) {
+          <span class="empresa-cargando">Cargando módulos disponibles…</span>
+        }
       </div>
 
-      @if (!empresaService.moduloHabilitadoParaEmpresa()) {
-        <p class="modulo-nota">No disponible para esta empresa</p>
-      }
+      <nav class="modulos-lista">
+        <div class="modulo-titulo" [class.modulo-titulo--deshabilitado]="!empresaService.moduloHabilitadoParaEmpresa()">
+          {{ empresaService.modulo.etiqueta }}
+        </div>
 
-      @for (submodulo of empresaService.modulo.submodulos; track submodulo.clave) {
-        @if (empresaService.moduloHabilitadoParaEmpresa() && submodulo.implementado) {
-          <a [routerLink]="submodulo.ruta" routerLinkActive="submodulo-activo" class="submodulo-item">
-            <i [class]="submodulo.icono"></i>
-            <span>{{ submodulo.etiqueta }}</span>
-          </a>
-        } @else {
-          <span class="submodulo-item submodulo-item--deshabilitado">
-            <i [class]="submodulo.icono"></i>
-            <span>{{ submodulo.etiqueta }}</span>
-            @if (empresaService.moduloHabilitadoParaEmpresa() && !submodulo.implementado) {
-              <span class="submodulo-etiqueta-estado">Próximamente</span>
-            }
-          </span>
+        @if (!empresaService.moduloHabilitadoParaEmpresa()) {
+          <p class="modulo-nota">No disponible para esta empresa</p>
         }
-      }
-    </nav>
+
+        @for (submodulo of empresaService.modulo.submodulos; track submodulo.clave) {
+          @if (empresaService.moduloHabilitadoParaEmpresa() && submodulo.implementado) {
+            <a [routerLink]="submodulo.ruta" routerLinkActive="submodulo-activo" class="submodulo-item">
+              <i [class]="submodulo.icono"></i>
+              <span>{{ submodulo.etiqueta }}</span>
+            </a>
+          } @else {
+            <span class="submodulo-item submodulo-item--deshabilitado">
+              <i [class]="submodulo.icono"></i>
+              <span>{{ submodulo.etiqueta }}</span>
+              @if (empresaService.moduloHabilitadoParaEmpresa() && !submodulo.implementado) {
+                <span class="submodulo-etiqueta-estado">Próximamente</span>
+              }
+            </span>
+          }
+        }
+
+        @if (sesionService.puedeCrearAccesoExterno()) {
+          <a routerLink="/accesos-externos" routerLinkActive="submodulo-activo" class="submodulo-item">
+            <i class="pi pi-users"></i>
+            <span>Accesos Externos</span>
+          </a>
+        }
+      </nav>
+    }
   </aside>
 
   <main class="shell-contenido">
