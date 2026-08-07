@@ -38,4 +38,10 @@ describe('SesionService', () => {
     expect(service.accesoExternoId()).toBe('acceso-1');
     expect(service.puedeAdministrarGiftcards()).toBe(false);
   });
+
+  it('arranca no autenticado, e iniciarSesion() lo marca true', () => {
+    expect(service.autenticado()).toBe(false);
+    service.iniciarSesion();
+    expect(service.autenticado()).toBe(true);
+  });
 });

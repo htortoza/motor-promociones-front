@@ -21,6 +21,9 @@ const ROLES_ADMINISTRADORES: Rol[] = ['master', 'administrador-holding', 'admini
 @Injectable({ providedIn: 'root' })
 export class SesionService {
   private readonly _sesion = signal<SesionState>(SESION_INICIAL);
+  private readonly _autenticado = signal(false);
+
+  readonly autenticado = this._autenticado.asReadonly();
 
   readonly rol = computed(() => this._sesion().rol);
   readonly empresaId = computed(() => this._sesion().empresaId);
@@ -37,5 +40,9 @@ export class SesionService {
 
   entrarComoCompradorExterno(accesoExternoId: string, nombreUsuario: string): void {
     this._sesion.set({ rol: 'comprador-externo', empresaId: null, accesoExternoId, nombreUsuario });
+  }
+
+  iniciarSesion(): void {
+    this._autenticado.set(true);
   }
 }
