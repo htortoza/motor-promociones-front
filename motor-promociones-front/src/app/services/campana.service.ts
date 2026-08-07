@@ -19,6 +19,19 @@ export class CampanaService {
     return this._campanas().filter((c) => idsIncluidos.includes(c.empresaId));
   });
 
+  /**
+   * Campañas de todo el holding, independiente de si la vista de giftcards está acotada a una tienda puntual.
+   * Otorgar un acceso externo es una acción de holding completo (§4.1 de la spec), no debe depender del drill-down de la vista.
+   */
+  readonly campanasDelHoldingActivo = computed(() => {
+    const activa = this.empresaService.empresaActiva();
+    if (!activa) return [];
+    const holdingId = activa.holdingId ?? activa.id;
+    const empresas = this.empresaService.empresas();
+    const idsHolding = [holdingId, ...empresas.filter((e) => e.holdingId === holdingId).map((e) => e.id)];
+    return this._campanas().filter((c) => idsHolding.includes(c.empresaId));
+  });
+
   readonly estadisticas = computed<EstadisticasCampana[]>(() => {
     const giftcards = this.giftcardService.giftcardsDeEmpresaActiva();
     return this.campanasDeEmpresaActiva().map((campana) => calcularEstadisticas(campana, giftcards));

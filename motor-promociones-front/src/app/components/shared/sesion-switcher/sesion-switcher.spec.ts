@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { SesionSwitcher } from './sesion-switcher';
 import { SesionService } from '../../../services/sesion.service';
 
@@ -7,12 +8,14 @@ describe('SesionSwitcher', () => {
   let fixture: ComponentFixture<SesionSwitcher>;
   let component: SesionSwitcher;
   let sesionService: SesionService;
+  let router: Router;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [SesionSwitcher] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [SesionSwitcher], providers: [provideRouter([])] }).compileComponents();
     fixture = TestBed.createComponent(SesionSwitcher);
     component = fixture.componentInstance;
     sesionService = TestBed.inject(SesionService);
+    router = TestBed.inject(Router);
     fixture.detectChanges();
   });
 
@@ -32,5 +35,11 @@ describe('SesionSwitcher', () => {
     component.cambiarRol('comprador-externo');
     expect(sesionService.rol()).toBe('comprador-externo');
     expect(sesionService.accesoExternoId()).toBe('');
+  });
+
+  it('cambiar de rol renavega a la raíz para que el guard reubique según el nuevo rol', () => {
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl');
+    component.cambiarRol('comprador-externo');
+    expect(navigateSpy).toHaveBeenCalledWith('/');
   });
 });

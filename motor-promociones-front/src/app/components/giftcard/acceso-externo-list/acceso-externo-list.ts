@@ -25,7 +25,7 @@ export class AccesoExternoList {
   private readonly campanaService = inject(CampanaService);
 
   readonly accesos = this.accesoExternoService.accesosDeHoldingActivo;
-  readonly campanasDisponibles = this.campanaService.campanasDeEmpresaActiva;
+  readonly campanasDisponibles = this.campanaService.campanasDelHoldingActivo;
 
   readonly modalVisible = signal(false);
   readonly nombre = signal('');

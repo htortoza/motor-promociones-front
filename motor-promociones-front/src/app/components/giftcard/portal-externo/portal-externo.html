@@ -14,7 +14,7 @@
       <tr>
         <td>{{ giftcard.codigo }}</td>
         <td>{{ giftcard.monto | currency: 'CLP' : 'symbol' : '1.0-0' }}</td>
-        <td><p-tag [value]="estado(giftcard)" /></td>
+        <td><p-tag [value]="estadoInfo(giftcard).etiqueta" [severity]="estadoInfo(giftcard).severidad" /></td>
         <td><p-button label="Ver" (onClick)="verDetalle(giftcard)" /></td>
       </tr>
     </ng-template>

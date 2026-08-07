@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Select } from 'primeng/select';
 import { SesionService } from '../../../services/sesion.service';
 import { EmpresaService } from '../../../services/empresa.service';
@@ -25,6 +26,7 @@ export class SesionSwitcher {
   private readonly sesionService = inject(SesionService);
   private readonly empresaService = inject(EmpresaService);
   private readonly accesoExternoService = inject(AccesoExternoService);
+  private readonly router = inject(Router);
 
   readonly opcionesRol = OPCIONES_ROL;
   readonly rolActual = computed(() => this.sesionService.rol());
@@ -39,15 +41,15 @@ export class SesionSwitcher {
     if (rol === 'comprador-externo') {
       const primero = this.opcionesAccesoExterno()[0];
       this.sesionService.entrarComoCompradorExterno(primero?.id ?? '', primero?.nombre ?? 'Comprador Externo');
-      return;
-    }
-    if (rol === 'master' || rol === 'administrador-holding') {
+    } else if (rol === 'master' || rol === 'administrador-holding') {
       const primerHolding = this.opcionesHolding()[0];
       this.sesionService.entrarComoInterno(rol, primerHolding?.id ?? '', rol === 'master' ? 'Master' : 'Administrador Holding');
-      return;
+    } else {
+      const primeraTienda = this.opcionesTienda()[0];
+      this.sesionService.entrarComoInterno(rol, primeraTienda?.id ?? '', rol === 'usuario-pos' ? 'Usuario POS' : 'Administrador Tienda');
     }
-    const primeraTienda = this.opcionesTienda()[0];
-    this.sesionService.entrarComoInterno(rol, primeraTienda?.id ?? '', rol === 'usuario-pos' ? 'Usuario POS' : 'Administrador Tienda');
+    // Los guards de ruta solo se evalúan en navegación — sin esto, cambiar de rol en la misma pantalla no reubica al usuario.
+    this.router.navigateByUrl('/');
   }
 
   cambiarEmpresaSesion(empresaId: string): void {

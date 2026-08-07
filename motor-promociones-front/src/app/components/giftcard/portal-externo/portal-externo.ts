@@ -6,8 +6,15 @@ import { TableModule } from 'primeng/table';
 import { Tag } from 'primeng/tag';
 import { Button } from 'primeng/button';
 import { GiftcardService } from '../../../services/giftcard.service';
-import { ActivarGiftcardPayload, BloquearGiftcardPayload, Giftcard, ReiniciarActivacionPayload, calcularEstadoGiftcard } from '../../../data/giftcard.model';
+import { GiftcardEstado, ActivarGiftcardPayload, BloquearGiftcardPayload, Giftcard, ReiniciarActivacionPayload, calcularEstadoGiftcard } from '../../../data/giftcard.model';
 import { GiftcardDetailDrawer } from '../giftcard-detail-drawer/giftcard-detail-drawer';
+
+const ESTADO_INFO: Record<GiftcardEstado, { etiqueta: string; severidad: 'success' | 'warn' | 'secondary' }> = {
+  'sin-activar': { etiqueta: 'Sin activar', severidad: 'secondary' },
+  activa: { etiqueta: 'Activa', severidad: 'success' },
+  agotada: { etiqueta: 'Agotada', severidad: 'secondary' },
+  inactiva: { etiqueta: 'Inactiva', severidad: 'warn' },
+};
 
 @Component({
   selector: 'app-portal-externo',
@@ -23,8 +30,8 @@ export class PortalExterno {
   readonly detalleVisible = signal(false);
   readonly giftcardSeleccionada = signal<Giftcard | null>(null);
 
-  estado(giftcard: Giftcard) {
-    return calcularEstadoGiftcard(giftcard);
+  estadoInfo(giftcard: Giftcard) {
+    return ESTADO_INFO[calcularEstadoGiftcard(giftcard)];
   }
 
   verDetalle(giftcard: Giftcard): void {

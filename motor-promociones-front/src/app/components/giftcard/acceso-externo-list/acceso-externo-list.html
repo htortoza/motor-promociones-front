@@ -42,7 +42,7 @@
 
   <label>
     Fecha de expiración del acceso
-    <p-datepicker [ngModel]="fechaExpiracion()" (ngModelChange)="fechaExpiracion.set($event)" dateFormat="yy-mm-dd" [fluid]="true" />
+    <p-datepicker [ngModel]="fechaExpiracion()" (ngModelChange)="fechaExpiracion.set($event)" dateFormat="yy-mm-dd" [fluid]="true" appendTo="body" />
   </label>
 
   <div class="dialog-acciones">
