@@ -10,6 +10,7 @@ import {
 } from '../data/giftcard.model';
 import { EmpresaService } from './empresa.service';
 import { SesionService } from './sesion.service';
+import { AccesoExternoService } from './acceso-externo.service';
 
 const MOCK_GIFTCARDS: Giftcard[] = [
   {
@@ -123,12 +124,19 @@ const MOCK_GIFTCARDS: Giftcard[] = [
 export class GiftcardService {
   private readonly empresaService = inject(EmpresaService);
   private readonly sesionService = inject(SesionService);
+  private readonly accesoExternoService = inject(AccesoExternoService);
   private readonly _giftcards = signal<Giftcard[]>(MOCK_GIFTCARDS);
   private secuencia = MOCK_GIFTCARDS.length;
 
   readonly giftcardsDeEmpresaActiva = computed(() => {
     const idsIncluidos = this.empresaService.empresasIncluidasEnVistaActiva();
     return this._giftcards().filter((g) => idsIncluidos.includes(g.empresaId));
+  });
+
+  /** Giftcards visibles para la sesión de comprador externo — solo las de sus recursos vigentes. */
+  readonly giftcardsDelAccesoExterno = computed(() => {
+    const idsRecursos = this.accesoExternoService.recursosVigentesDeSesion().map((r) => r.idRecurso);
+    return this._giftcards().filter((g) => g.campanaId !== null && idsRecursos.includes(g.campanaId));
   });
 
   readonly metricas = computed(() => {

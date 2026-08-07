@@ -11,6 +11,7 @@ import { InputNumber } from 'primeng/inputnumber';
 import { Message } from 'primeng/message';
 import { ActivarGiftcardPayload, BloquearGiftcardPayload, Giftcard, GiftcardEstado, MovimientoTipo, ReiniciarActivacionPayload, calcularEstadoGiftcard } from '../../../data/giftcard.model';
 import { CampanaService } from '../../../services/campana.service';
+import { SesionService } from '../../../services/sesion.service';
 
 const ESTADO_INFO: Record<GiftcardEstado, { etiqueta: string; severidad: 'success' | 'warn' | 'secondary' }> = {
   'sin-activar': { etiqueta: 'Sin activar', severidad: 'secondary' },
@@ -39,6 +40,7 @@ type AccionActiva = 'ninguna' | 'activar' | 'bloquear';
 })
 export class GiftcardDetailDrawer {
   private readonly campanaService = inject(CampanaService);
+  private readonly sesionService = inject(SesionService);
 
   readonly visible = model.required<boolean>();
   readonly giftcard = input<Giftcard | null>(null);
@@ -83,8 +85,12 @@ export class GiftcardDetailDrawer {
 
   readonly puedeActivar = computed(() => this.estadoCalculado() === 'sin-activar');
   readonly esDinamico = computed(() => this.giftcard()?.tipoMonto === 'dinamico');
-  readonly puedeBloquear = computed(() => this.estadoCalculado() !== 'inactiva' && this.estadoCalculado() !== null);
-  readonly puedeReiniciarActivacion = computed(() => this.giftcard()?.fechaActivacion !== null && this.estadoCalculado() !== 'inactiva');
+  readonly puedeBloquear = computed(
+    () => this.sesionService.puedeAdministrarGiftcards() && this.estadoCalculado() !== 'inactiva' && this.estadoCalculado() !== null,
+  );
+  readonly puedeReiniciarActivacion = computed(
+    () => this.sesionService.puedeAdministrarGiftcards() && this.giftcard()?.fechaActivacion !== null && this.estadoCalculado() !== 'inactiva',
+  );
 
   etiquetaMovimiento(tipo: MovimientoTipo): string {
     return MOVIMIENTO_ETIQUETA[tipo];

@@ -3,17 +3,20 @@ import { TestBed } from '@angular/core/testing';
 import { GiftcardService } from './giftcard.service';
 import { EmpresaService } from './empresa.service';
 import { SesionService } from './sesion.service';
+import { AccesoExternoService } from './acceso-externo.service';
 
 describe('GiftcardService — alcance por holding', () => {
   let giftcardService: GiftcardService;
   let empresaService: EmpresaService;
   let sesionService: SesionService;
+  let accesoExternoService: AccesoExternoService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
     giftcardService = TestBed.inject(GiftcardService);
     empresaService = TestBed.inject(EmpresaService);
     sesionService = TestBed.inject(SesionService);
+    accesoExternoService = TestBed.inject(AccesoExternoService);
   });
 
   it('administrador-holding con el holding activo ve las giftcards de empresa-1 (agregado)', () => {
@@ -40,5 +43,27 @@ describe('GiftcardService — alcance por holding', () => {
     const antes = giftcardService.giftcardsDeEmpresaActiva().length;
     giftcardService.crear({ modo: 'individual', tipoMonto: 'fijo', canal: 'ambos', montoFijo: 5000, crearSoloComoVigente: true });
     expect(giftcardService.giftcardsDeEmpresaActiva().length).toBe(antes);
+  });
+
+  it('giftcardsDelAccesoExterno solo muestra giftcards de campañas otorgadas y vigentes', () => {
+    sesionService.entrarComoInterno('administrador-holding', 'empresa-1', 'Admin Italmod');
+    // MOCK_GIFTCARDS trae 2 giftcards con campanaId: 'campana-1' (ids '1' y '2').
+    accesoExternoService.crear({ nombre: 'DOT Solutions', recurso: { tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2099-01-01' } });
+    const [acceso] = accesoExternoService.accesosDeHoldingActivo();
+
+    sesionService.entrarComoCompradorExterno(acceso.id, 'DOT Solutions');
+
+    const visibles = giftcardService.giftcardsDelAccesoExterno();
+    expect(visibles.map((g) => g.id).sort()).toEqual(['1', '2']);
+  });
+
+  it('giftcardsDelAccesoExterno queda vacío si el recurso otorgado ya venció', () => {
+    sesionService.entrarComoInterno('administrador-holding', 'empresa-1', 'Admin Italmod');
+    accesoExternoService.crear({ nombre: 'DOT Solutions', recurso: { tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2000-01-01' } });
+    const [acceso] = accesoExternoService.accesosDeHoldingActivo();
+
+    sesionService.entrarComoCompradorExterno(acceso.id, 'DOT Solutions');
+
+    expect(giftcardService.giftcardsDelAccesoExterno()).toEqual([]);
   });
 });
