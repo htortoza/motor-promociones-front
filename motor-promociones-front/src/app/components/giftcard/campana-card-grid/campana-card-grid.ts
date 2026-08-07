@@ -6,6 +6,7 @@ import { Skeleton } from 'primeng/skeleton';
 import { ConfirmPopup } from 'primeng/confirmpopup';
 import { ConfirmationService } from 'primeng/api';
 import { CampanaService } from '../../../services/campana.service';
+import { SesionService } from '../../../services/sesion.service';
 import { CrearCampanaPayload, EstadisticasCampana } from '../../../data/giftcard.model';
 import { CampanaCreateModal } from '../campana-create-modal/campana-create-modal';
 
@@ -21,6 +22,7 @@ const DURACION_CARGA_MS = 450;
 export class CampanaCardGrid {
   private readonly campanaService = inject(CampanaService);
   private readonly confirmationService = inject(ConfirmationService);
+  readonly sesionService = inject(SesionService);
 
   readonly abrirCampana = output<string>();
 

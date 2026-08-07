@@ -13,6 +13,7 @@ import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { GiftcardService } from '../../../services/giftcard.service';
 import { CampanaService } from '../../../services/campana.service';
+import { SesionService } from '../../../services/sesion.service';
 import { ActivarGiftcardPayload, BloquearGiftcardPayload, CrearGiftcardPayload, Giftcard, GiftcardEstado, ReiniciarActivacionPayload, calcularEstadoGiftcard } from '../../../data/giftcard.model';
 import { GiftcardCreateModal } from '../giftcard-create-modal/giftcard-create-modal';
 import { GiftcardDetailDrawer } from '../giftcard-detail-drawer/giftcard-detail-drawer';
@@ -80,6 +81,7 @@ const OPCIONES_ESTADO: { label: string; value: FiltroEstado }[] = [
 export class GiftcardList {
   private readonly giftcardService = inject(GiftcardService);
   private readonly campanaService = inject(CampanaService);
+  readonly sesionService = inject(SesionService);
 
   readonly opcionesEstado = OPCIONES_ESTADO;
   readonly opcionesVista = OPCIONES_VISTA;

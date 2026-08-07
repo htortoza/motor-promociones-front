@@ -54,7 +54,9 @@
         (onChange)="filtroEstado.set($event.value)"
       />
       <app-giftcard-informe-panel class="filtro-informe" />
-      <p-button label="Crear giftcard" icon="pi pi-plus" class="filtro-crear" (onClick)="modalCrearVisible.set(true)" />
+      @if (sesionService.puedeAdministrarGiftcards()) {
+        <p-button label="Crear giftcard" icon="pi pi-plus" class="filtro-crear" (onClick)="modalCrearVisible.set(true)" />
+      }
     </div>
 
     <p-table [value]="filasTabla()" dataKey="id" styleClass="giftcard-tabla">

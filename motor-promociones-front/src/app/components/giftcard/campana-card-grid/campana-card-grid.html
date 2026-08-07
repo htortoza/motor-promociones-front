@@ -8,7 +8,7 @@
         [outlined]="true"
         (onClick)="verArchivadas.set(!verArchivadas())"
       />
-      @if (!verArchivadas()) {
+      @if (!verArchivadas() && sesionService.puedeAdministrarGiftcards()) {
         <p-button label="Crear campaña" icon="pi pi-plus" (onClick)="modalCrearVisible.set(true)" />
       }
     </div>
