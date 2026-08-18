@@ -35,3 +35,13 @@
   font-size: 0.85rem;
   color: var(--p-text-muted-color);
 }
+
+.cupo-info {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+}
+
+.cupo-agotado {
+  color: var(--p-red-600);
+}

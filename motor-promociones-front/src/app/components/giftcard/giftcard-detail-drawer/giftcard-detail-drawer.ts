@@ -65,10 +65,11 @@ export class GiftcardDetailDrawer {
     return estado ? ESTADO_INFO[estado] : null;
   });
 
+  /** % consumido, no % restante — una giftcard agotada gastó el 100% de su monto, la barra debe verse llena. */
   readonly progresoSaldo = computed(() => {
     const giftcard = this.giftcard();
     if (!giftcard || giftcard.monto <= 0) return 0;
-    return Math.round((giftcard.saldo / giftcard.monto) * 100);
+    return Math.round(((giftcard.monto - giftcard.saldo) / giftcard.monto) * 100);
   });
 
   readonly nombreCampana = computed(() => {
@@ -85,12 +86,16 @@ export class GiftcardDetailDrawer {
 
   readonly puedeActivar = computed(() => this.estadoCalculado() === 'sin-activar');
   readonly esDinamico = computed(() => this.giftcard()?.tipoMonto === 'dinamico');
-  readonly puedeBloquear = computed(
-    () => this.sesionService.puedeAdministrarGiftcards() && this.estadoCalculado() !== 'inactiva' && this.estadoCalculado() !== null,
-  );
-  readonly puedeReiniciarActivacion = computed(
-    () => this.sesionService.puedeAdministrarGiftcards() && this.giftcard()?.fechaActivacion !== null && this.estadoCalculado() !== 'inactiva',
-  );
+  readonly puedeBloquear = computed(() => {
+    const estado = this.estadoCalculado();
+    return this.sesionService.puedeAdministrarGiftcards() && estado !== null && estado !== 'inactiva' && estado !== 'agotada';
+  });
+  readonly puedeReiniciarActivacion = computed(() => {
+    const estado = this.estadoCalculado();
+    return (
+      this.sesionService.puedeAdministrarGiftcards() && this.giftcard()?.fechaActivacion !== null && estado !== 'inactiva' && estado !== 'agotada'
+    );
+  });
 
   etiquetaMovimiento(tipo: MovimientoTipo): string {
     return MOVIMIENTO_ETIQUETA[tipo];

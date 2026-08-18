@@ -1,0 +1,75 @@
+<div class="login-screen">
+  <section class="login-marca">
+    <svg class="login-marca__grid" aria-hidden="true">
+      <defs>
+        <pattern id="loginGrid" width="28" height="28" patternUnits="userSpaceOnUse">
+          <path d="M28 0H0V28" fill="none" stroke="white" stroke-width="0.6" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#loginGrid)" />
+    </svg>
+
+    <div class="login-marca__atmosfera" aria-hidden="true"></div>
+
+    <div class="login-marca__contenido">
+      <div class="login-wordmark">
+        <span class="login-glifo"></span>
+        <span class="login-wordmark__nombre">Motor de Promociones</span>
+        <span class="login-wordmark__separador">·</span>
+        <span class="login-wordmark__marca">DOT Solutions</span>
+      </div>
+
+      <div class="login-hero">
+        <h1 class="login-headline">
+          Todo lo que tu marca<br />
+          regala, descuenta <em class="login-headline__acento">o canjea.</em>
+        </h1>
+        <p class="login-descripcion">
+          Un motor para crear y gobernar promociones en toda la red, descuentos, giftcards, códigos QR y programas de fidelización, con roles
+          claros y accesos externos que nunca ven de más.
+        </p>
+      </div>
+
+      <ol class="login-caracteristicas">
+        @for (caracteristica of caracteristicas; track caracteristica.texto) {
+          <li class="login-caracteristica">
+            <span class="login-caracteristica__icono"><i [class]="caracteristica.icono"></i></span>
+            <span class="login-caracteristica__texto">{{ caracteristica.texto }}</span>
+          </li>
+        }
+      </ol>
+
+      <div class="login-roles">
+        <div class="login-roles__label">Un panel, cinco niveles de acceso</div>
+        <div class="login-roles__chips">
+          @for (nivel of nivelesAcceso; track nivel) {
+            <span class="login-chip">{{ nivel }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-form">
+    <div class="login-card">
+      <span class="login-glifo login-card__glifo"></span>
+
+      <h2 class="login-card__titulo">Bienvenido <em class="login-headline__acento">de vuelta</em></h2>
+      <p class="login-card__subtitulo">Ingresa con tu cuenta para administrar promociones, campañas y accesos.</p>
+
+      <label class="login-card__campo">
+        Usuario
+        <input pInputText type="text" [ngModel]="usuario()" (ngModelChange)="usuario.set($event)" placeholder="nombre@dotsolutions.io" [fluid]="true" />
+      </label>
+
+      <label class="login-card__campo">
+        Contraseña
+        <p-password [ngModel]="clave()" (ngModelChange)="clave.set($event)" [toggleMask]="true" [feedback]="false" [fluid]="true" />
+      </label>
+
+      <p-button label="Ingresar" class="login-card__boton" [fluid]="true" (onClick)="ingresar()" />
+
+      <p class="login-card__nota">Acceso interno — sin registro público.</p>
+    </div>
+  </section>
+</div>

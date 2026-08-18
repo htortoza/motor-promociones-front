@@ -145,6 +145,20 @@ import { PrimeTemplate } from 'primeng/api';
 // Agregar al array imports[] del componente
 ```
 
+### Gotchas confirmados en este proyecto (no volver a redescubrirlos)
+
+**`<p-drawer>` NO se auto-porta a `body` — `<p-dialog>` sí.**
+Un `<p-drawer>` sin `appendTo="body"` queda anidado en el árbol del componente, en un stacking context local. Si su hermano `.p-drawer-mask` sí llega a `body` (comportamiento por defecto), el mask le gana visualmente y por click aunque el drawer tenga `z-index` numéricamente mayor — el z-index solo importa dentro del mismo stacking context. Síntoma: drawer se ve "detrás" del fondo oscuro, o sus botones no reciben click. Fix de una línea: `<p-drawer appendTo="body" ...>`. `<p-dialog>` no necesita esto, ya se porta solo.
+
+**`<p-dialog>` es arrastrable por defecto.**
+`[draggable]` default es `true`. Si no se quiere que el modal se pueda mover, hay que poner `[draggable]="false"` explícito en cada `<p-dialog>`.
+
+**Nunca envolver dos elementos interactivos distintos dentro del mismo `<label>`.**
+Ej: `<label><span><button>...</button></span><p-select>...</p-select></label>`. El navegador reenvía cualquier click dentro de un `<label>` a su primer descendiente "labelable" (el `<button>`, por ser el primero en el DOM) — así que clickear el `<p-select>` también dispara el `<button>` como efecto colateral, sin que exista ningún bug de lógica en el componente. Si un campo tiene más de un control interactivo, usar `<div class="form-campo">` en vez de `<label>` para ese campo puntual (los campos de un solo input sí pueden seguir usando `<label>` sin problema).
+
+**`display: flex` en un `<td>` rompe la alineación de la fila.**
+Al aplicar `display: flex` directo sobre un `<td>`, ese elemento deja de participar como `table-cell` en el cálculo de alto de la fila — queda más bajo que sus hermanos y la fila se ve "desnivelada" (bordes/íconos no alineados). Fix: nunca flexear el `<td>` directamente — envolver el contenido en un `<div>` interno con el flex, dejando el `<td>` intacto como `table-cell`.
+
 ---
 
 ## ESTRATEGIA DE CSS
@@ -207,8 +221,13 @@ src/
 
 ## MÓDULO GIFTCARDS — REGLAS DE NEGOCIO
 
+> Snapshot funcional completo (roles, permisos, qué falta, qué simular) en `docs/doc-product/Funcionalidades_App_*.md` — leerlo para entender el alcance de negocio antes de decidir si algo es "bug" o "comportamiento simulado a propósito" (ej: login sin validar, emails simulados, selector de rol de demo).
+
 ### Estado siempre derivado
 `GiftcardEstado` (`sin-activar | activa | agotada | inactiva`) **nunca se guarda como campo**. Se calcula siempre con `calcularEstadoGiftcard()` a partir de `vigente` + `fechaActivacion` + `saldo` (`giftcard.model.ts`).
+
+### `agotada` e `inactiva` son estados terminales — ninguna acción sobre ellos
+Una giftcard `agotada` (saldo llegó a 0) ya cumplió su ciclo: no se puede activar, bloquear ni reiniciar su activación. Es el mismo tratamiento que `inactiva` (bloqueada). Los tres computed de permisos en `GiftcardDetailDrawer` (`puedeActivar`, `puedeBloquear`, `puedeReiniciarActivacion`) deben excluir **ambos** estados terminales, no solo `inactiva` — es un error fácil de reintroducir al tocar ese archivo. La barra de progreso del drawer (`progresoSaldo`) muestra **% consumido**, no % restante: por eso una giftcard agotada se ve con la barra 100% llena, no vacía.
 
 ### Auditoría de movimientos
 Todo `Movimiento` (creación, venta, uso, ajuste) lleva `usuario: string` — quién ejecutó la acción. Cualquier método nuevo en `GiftcardService` que empuje un movimiento (`crear`, `activar`, `bloquear`, `reiniciarActivacion`) debe incluir `usuario`. Hoy no hay auth real: se usa la constante `USUARIO_ACTUAL` en `giftcard.service.ts` como placeholder.
@@ -285,9 +304,38 @@ Todo dato de Giftcard/Campaña está scoped por `empresaId`. Los computed de ser
 
 1. **Consultar MCP** antes de implementar cualquier componente PrimeNG.
 2. **Buscar en `styles.css`** si la clase/estilo ya existe antes de crear CSS nuevo.
-3. **Implementar** usando componentes PrimeNG + CSS semántico con `var(--p-...)`.
-4. **Verificar** que no quedan clases utilitarias, inline styles estáticos ni tokens `var(--color-*)` custom.
-5. **Build** — `ng build` sin errores ni warnings de presupuesto CSS.
+3. **TDD** — spec primero cuando el cambio es de lógica/negocio (`*.spec.ts`, Vitest). Ver skill `angular-testing`.
+4. **Implementar** usando componentes PrimeNG + CSS semántico con `var(--p-...)`.
+5. **Verificar sin excepción, en este orden:**
+   - `ng test` — toda la suite, no solo el spec tocado (regresión).
+   - `ng build` — sin errores ni warnings nuevos de presupuesto CSS/JS.
+   - **Verificación visual en navegador real** (Chrome MCP) para cualquier cambio de UI — type-check y tests no prueban que la pantalla se vea o se comporte bien. Ver sección siguiente.
+6. Confirmar que no quedan clases utilitarias, inline styles estáticos ni tokens `var(--color-*)` custom.
+
+---
+
+## ENTORNO DE DESARROLLO Y VERIFICACIÓN EN NAVEGADOR
+
+### El puerto 4200 puede estar ocupado por OTRO proyecto
+Este equipo corre más de un `ng serve` en paralelo (ej. `mobile-one-frontend`). Cuando dos procesos escuchan en `4200` (uno en IPv4, otro en dual-stack IPv6), el navegador puede aterrizar en el proyecto equivocado sin ningún error visible. **Antes de asumir que `localhost:4200` es este proyecto:**
+```bash
+lsof -iTCP -sTCP:LISTEN -n -P | grep 4200   # confirmar qué proceso es
+ps -p <PID> -o command=                      # debe decir "ng serve (motor-promociones-front)"
+```
+Si está ocupado por otro proyecto, levantar este en otro puerto y usar ESE puerto para toda la verificación de la tarea:
+```bash
+npx ng serve --port 4201
+```
+
+### Login de la demo no valida credenciales
+Cualquier click en "Ingresar" entra — no hace falta escribir usuario/contraseña reales (ver sección de negocio más abajo). Para reproducir un bug de un rol específico, usar el selector de sesión del sidebar tras loguearse.
+
+### Preferir DOM directo sobre coordenadas de pantalla
+Las coordenadas de click de la herramienta `computer` (basada en screenshot) no siempre mapean 1:1 al viewport real de la página en este entorno — puede fallar al intentar clickear elementos angostos o muy próximos entre sí. Para reproducir bugs de click con precisión, preferir `javascript_tool` con selección directa del DOM y `.click()`, no coordenadas:
+```js
+Array.from(document.querySelectorAll('button')).find(b => b.textContent.trim() === 'Ingresar').click();
+```
+Evitar loops largos con múltiples `await` dentro de un solo `javascript_tool` — en este entorno han causado timeouts de 45s aun cuando la página seguía respondiendo normalmente (confirmado con una llamada simple `1+1` inmediatamente después). Preferir varias llamadas cortas y secuenciales en vez de un solo script con loop.
 
 ---
 

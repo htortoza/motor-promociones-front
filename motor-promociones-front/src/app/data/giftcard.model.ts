@@ -46,6 +46,19 @@ export interface Empresa {
   holdingId: string | null;
 }
 
+export interface DenominacionTier {
+  monto: number;
+  cantidad: number;
+}
+
+/**
+ * Gobierna qué monto pueden tener las giftcards de una campaña:
+ * - 'abierto': sin monto fijo — se cobra según el gasto real del cliente (tipoMonto dinámico obligatorio).
+ * - 'fijo-unico': todas las giftcards de la campaña valen exactamente `monto`.
+ * - 'fijo-tiers': la campaña tiene varias denominaciones, cada una con su propio cupo (ej. 5 de $10.000, 10 de $20.000).
+ */
+export type PoliticaMonto = { tipo: 'abierto' } | { tipo: 'fijo-unico'; monto: number } | { tipo: 'fijo-tiers'; tiers: DenominacionTier[] };
+
 /** Agrupa códigos de giftcard bajo una campaña con vigencia propia (ej. "Campaña Invierno"). */
 export interface Campana {
   id: string;
@@ -55,6 +68,9 @@ export interface Campana {
   fechaInicio: string;
   fechaFin: string;
   archivada: boolean;
+  /** Tope total de giftcards que puede tener esta campaña a lo largo de su vida — no solo por lote. Con 'fijo-tiers' es la suma de los tiers. */
+  cupoMaximo: number;
+  politicaMonto: PoliticaMonto;
 }
 
 export interface EstadisticasCampana {
@@ -70,6 +86,8 @@ export interface CrearCampanaPayload {
   nombre: string;
   fechaInicio: string;
   fechaFin: string;
+  cupoMaximo: number;
+  politicaMonto: PoliticaMonto;
 }
 
 export interface CrearGiftcardIndividualPayload {

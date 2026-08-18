@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { autenticadoGuard } from './guards/autenticado.guard';
+import { yaAutenticadoGuard } from './guards/ya-autenticado.guard';
 import { rolRedirectGuard } from './guards/rol-redirect.guard';
 import { soloInternoGuard } from './guards/solo-interno.guard';
 import { soloAdministradorHoldingGuard } from './guards/solo-administrador-holding.guard';
@@ -8,6 +9,7 @@ import { soloCompradorExternoGuard } from './guards/solo-comprador-externo.guard
 export const routes: Routes = [
   {
     path: 'login',
+    canActivate: [yaAutenticadoGuard],
     loadComponent: () => import('./components/login/login-screen/login-screen').then((m) => m.LoginScreen),
   },
   { path: '', pathMatch: 'full', canActivate: [autenticadoGuard, rolRedirectGuard], children: [] },

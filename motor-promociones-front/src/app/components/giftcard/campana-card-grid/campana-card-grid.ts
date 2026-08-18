@@ -9,12 +9,13 @@ import { CampanaService } from '../../../services/campana.service';
 import { SesionService } from '../../../services/sesion.service';
 import { CrearCampanaPayload, EstadisticasCampana } from '../../../data/giftcard.model';
 import { CampanaCreateModal } from '../campana-create-modal/campana-create-modal';
+import { PageHeader } from '../../shared/page-header/page-header';
 
 const DURACION_CARGA_MS = 450;
 
 @Component({
   selector: 'app-campana-card-grid',
-  imports: [Card, Button, Tag, Skeleton, ConfirmPopup, CampanaCreateModal],
+  imports: [Card, Button, Tag, Skeleton, ConfirmPopup, CampanaCreateModal, PageHeader],
   templateUrl: './campana-card-grid.html',
   styleUrl: './campana-card-grid.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

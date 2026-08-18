@@ -150,12 +150,18 @@ export class GiftcardService {
     };
   });
 
+  /** Todas las giftcards ya generadas para una campaña, sin importar la vista de empresa activa — el cupo es propio de la campaña. */
+  giftcardsDeCampana(campanaId: string): Giftcard[] {
+    return this._giftcards().filter((g) => g.campanaId === campanaId);
+  }
+
   crear(payload: CrearGiftcardPayload): void {
     const empresaActiva = this.empresaService.empresaActiva();
     if (!empresaActiva) return;
 
     const monto = payload.tipoMonto === 'fijo' ? (payload.montoFijo ?? 0) : 0;
     const cantidad = payload.modo === 'lote' ? payload.cantidad : 1;
+    if (cantidad === 0) return;
     // Monto dinámico se asigna al activar — nunca puede nacer ya activada.
     const crearActivada = payload.tipoMonto === 'fijo' && payload.modo === 'individual' && !payload.crearSoloComoVigente;
     const prefijo = generarPrefijoCodigo();

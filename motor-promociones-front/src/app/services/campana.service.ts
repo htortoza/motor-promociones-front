@@ -4,7 +4,17 @@ import { EmpresaService } from './empresa.service';
 import { GiftcardService } from './giftcard.service';
 
 const MOCK_CAMPANAS: Campana[] = [
-  { id: 'campana-1', empresaId: 'empresa-1', nombre: 'Campaña Invierno', fechaCreacion: '2026-05-28', fechaInicio: '2026-06-01', fechaFin: '2026-08-31', archivada: false },
+  {
+    id: 'campana-1',
+    empresaId: 'empresa-1',
+    nombre: 'Campaña Invierno',
+    fechaCreacion: '2026-05-28',
+    fechaInicio: '2026-06-01',
+    fechaFin: '2026-08-31',
+    archivada: false,
+    cupoMaximo: 500,
+    politicaMonto: { tipo: 'abierto' },
+  },
 ];
 
 @Injectable({ providedIn: 'root' })
@@ -63,6 +73,28 @@ export class CampanaService {
 
   campanaPorId(id: string): Campana | null {
     return this._campanas().find((c) => c.id === id) ?? null;
+  }
+
+  /** Giftcards ya generadas contra el cupo de esta campaña — global, sin importar la vista de empresa activa. */
+  cantidadGiftcardsDeCampana(campanaId: string): number {
+    return this.giftcardService.giftcardsDeCampana(campanaId).length;
+  }
+
+  /** Cuánto le queda a la campaña antes de tocar su cupo máximo. Nunca negativo. */
+  cupoDisponible(campanaId: string): number {
+    const campana = this.campanaPorId(campanaId);
+    if (!campana) return 0;
+    return Math.max(0, campana.cupoMaximo - this.cantidadGiftcardsDeCampana(campanaId));
+  }
+
+  /** Cuánto le queda a una denominación puntual de una campaña 'fijo-tiers'. 0 si la campaña no usa esa política o esa denominación no existe. */
+  cupoDisponibleTier(campanaId: string, monto: number): number {
+    const campana = this.campanaPorId(campanaId);
+    if (!campana || campana.politicaMonto.tipo !== 'fijo-tiers') return 0;
+    const tier = campana.politicaMonto.tiers.find((t) => t.monto === monto);
+    if (!tier) return 0;
+    const generadas = this.giftcardService.giftcardsDeCampana(campanaId).filter((g) => g.monto === monto).length;
+    return Math.max(0, tier.cantidad - generadas);
   }
 
   estadisticasDe(campanaId: string): EstadisticasCampana | null {

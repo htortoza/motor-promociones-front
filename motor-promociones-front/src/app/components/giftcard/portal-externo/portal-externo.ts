@@ -8,6 +8,7 @@ import { Button } from 'primeng/button';
 import { GiftcardService } from '../../../services/giftcard.service';
 import { GiftcardEstado, ActivarGiftcardPayload, BloquearGiftcardPayload, Giftcard, ReiniciarActivacionPayload, calcularEstadoGiftcard } from '../../../data/giftcard.model';
 import { GiftcardDetailDrawer } from '../giftcard-detail-drawer/giftcard-detail-drawer';
+import { PageHeader } from '../../shared/page-header/page-header';
 
 const ESTADO_INFO: Record<GiftcardEstado, { etiqueta: string; severidad: 'success' | 'warn' | 'secondary' }> = {
   'sin-activar': { etiqueta: 'Sin activar', severidad: 'secondary' },
@@ -18,7 +19,7 @@ const ESTADO_INFO: Record<GiftcardEstado, { etiqueta: string; severidad: 'succes
 
 @Component({
   selector: 'app-portal-externo',
-  imports: [CurrencyPipe, PrimeTemplate, Card, TableModule, Tag, Button, GiftcardDetailDrawer],
+  imports: [CurrencyPipe, PrimeTemplate, Card, TableModule, Tag, Button, GiftcardDetailDrawer, PageHeader],
   templateUrl: './portal-externo.html',
   styleUrl: './portal-externo.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,9 +1,24 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { AccesoExterno, CrearAccesoExternoPayload, OtorgarRecursoPayload, recursoVigente } from '../data/governance.model';
+import { AccesoExterno, ActualizarAccesoExternoPayload, CrearAccesoExternoPayload, OtorgarRecursoPayload, recursoVigente } from '../data/governance.model';
 import { EmpresaService } from './empresa.service';
 import { SesionService } from './sesion.service';
 
-const MOCK_ACCESOS_EXTERNOS: AccesoExterno[] = [];
+const MOCK_ACCESOS_EXTERNOS: AccesoExterno[] = [
+  {
+    id: 'acceso-externo-1',
+    nombre: 'Falabella Retail',
+    email: 'compras@falabella.com',
+    empresaVendedoraId: 'empresa-1',
+    recursos: [{ tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2026-12-31' }],
+  },
+  {
+    id: 'acceso-externo-2',
+    nombre: 'Cencosud B2B',
+    email: 'b2b@cencosud.com',
+    empresaVendedoraId: 'empresa-1',
+    recursos: [{ tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2026-01-15' }],
+  },
+];
 
 @Injectable({ providedIn: 'root' })
 export class AccesoExternoService {
@@ -33,7 +48,20 @@ export class AccesoExternoService {
     return acceso.recursos.filter((r) => recursoVigente(r, hoy));
   });
 
+  /** Busca sin importar mayúsculas/espacios — el correo es el identificador de login de la cuenta. */
+  buscarPorEmail(email: string): AccesoExterno | null {
+    const normalizado = email.trim().toLowerCase();
+    return this._accesos().find((a) => a.email.toLowerCase() === normalizado) ?? null;
+  }
+
+  /** Si el correo ya tiene una cuenta, el recurso se agrega a esa cuenta en vez de duplicar (es el mismo comprador). */
   crear(payload: CrearAccesoExternoPayload): void {
+    const existente = this.buscarPorEmail(payload.email);
+    if (existente) {
+      this.otorgarRecurso({ accesoExternoId: existente.id, recurso: payload.recurso });
+      return;
+    }
+
     const empresa = this.empresaService.empresaActiva();
     if (!empresa) return;
 
@@ -42,10 +70,22 @@ export class AccesoExternoService {
     const acceso: AccesoExterno = {
       id: `acceso-externo-${this.secuencia}`,
       nombre: payload.nombre,
+      email: payload.email.trim(),
       empresaVendedoraId: holdingId,
       recursos: [payload.recurso],
     };
     this._accesos.update((lista) => [acceso, ...lista]);
+  }
+
+  /** No permite tomar el correo de otra cuenta ya existente — el correo es el identificador de login. */
+  actualizar(payload: ActualizarAccesoExternoPayload): void {
+    const emailNormalizado = payload.email.trim().toLowerCase();
+    const colision = this._accesos().find((a) => a.id !== payload.id && a.email.toLowerCase() === emailNormalizado);
+    if (colision) return;
+
+    this._accesos.update((lista) =>
+      lista.map((a) => (a.id === payload.id ? { ...a, nombre: payload.nombre.trim(), email: payload.email.trim() } : a)),
+    );
   }
 
   otorgarRecurso(payload: OtorgarRecursoPayload): void {

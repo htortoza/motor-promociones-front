@@ -1,11 +1,3 @@
-.giftcard-page {
-  padding: 24px;
-}
-
-.vista-toggle-bar {
-  margin-bottom: 24px;
-}
-
 .chip-filtro-campana {
   display: flex;
   align-items: center;
@@ -14,13 +6,13 @@
   padding: 6px 8px 6px 12px;
   margin-bottom: 16px;
   border-radius: var(--p-border-radius-md, 6px);
-  background: var(--p-blue-50);
+  background: var(--p-primary-50);
   color: var(--p-text-color);
   font-size: 0.875rem;
 }
 
 .chip-filtro-campana .pi-objects-column {
-  color: var(--p-blue-500, var(--p-primary-color));
+  color: var(--p-primary-color);
 }
 
 .chip-filtro-cerrar {
@@ -38,7 +30,7 @@
 }
 
 .chip-filtro-cerrar:hover {
-  background: var(--p-blue-100);
+  background: var(--p-primary-100);
 }
 
 .metrics-panel {
@@ -80,7 +72,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .filtro-busqueda {
@@ -97,7 +89,6 @@
 
 p-table.giftcard-tabla {
   display: block;
-  margin-top: 16px;
 }
 
 .celda-mono {
@@ -127,17 +118,17 @@ p-table.giftcard-tabla {
 }
 
 .fila-campana {
-  background: var(--p-blue-50);
+  background: var(--p-primary-50);
   font-weight: 500;
 }
 
 .fila-campana:hover {
-  background: var(--p-blue-100);
+  background: var(--p-primary-100);
 }
 
 .fila-campana td {
   padding: 10px 16px;
-  border-left: 3px solid var(--p-blue-300);
+  border-left: 3px solid var(--p-primary-300);
 }
 
 .fila-campana-contenido {
@@ -157,14 +148,14 @@ p-table.giftcard-tabla {
 }
 
 .fila-anidada {
-  background: var(--p-blue-50);
+  background: var(--p-primary-50);
 }
 
 .fila-anidada:hover {
-  background: var(--p-blue-100);
+  background: var(--p-primary-100);
 }
 
 .fila-anidada td:first-child {
   padding-left: 32px;
-  border-left: 3px solid var(--p-blue-300);
+  border-left: 3px solid var(--p-primary-300);
 }

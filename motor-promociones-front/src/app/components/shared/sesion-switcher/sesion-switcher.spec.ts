@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { SesionSwitcher } from './sesion-switcher';
 import { SesionService } from '../../../services/sesion.service';
+import { AccesoExternoService } from '../../../services/acceso-externo.service';
 
 describe('SesionSwitcher', () => {
   let fixture: ComponentFixture<SesionSwitcher>;
@@ -31,10 +32,11 @@ describe('SesionSwitcher', () => {
     expect(sesionService.empresaId()).toBe('empresa-1');
   });
 
-  it('cambiar a comprador-externo sin cuentas disponibles entra con id vacío', () => {
+  it('cambiar a comprador-externo entra con la primera cuenta externa disponible', () => {
+    const accesoExternoService = TestBed.inject(AccesoExternoService);
     component.cambiarRol('comprador-externo');
     expect(sesionService.rol()).toBe('comprador-externo');
-    expect(sesionService.accesoExternoId()).toBe('');
+    expect(sesionService.accesoExternoId()).toBe(accesoExternoService.todos()[0].id);
   });
 
   it('cambiar de rol renavega a la raíz para que el guard reubique según el nuevo rol', () => {

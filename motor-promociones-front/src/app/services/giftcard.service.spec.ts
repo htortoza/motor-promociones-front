@@ -48,7 +48,7 @@ describe('GiftcardService — alcance por holding', () => {
   it('giftcardsDelAccesoExterno solo muestra giftcards de campañas otorgadas y vigentes', () => {
     sesionService.entrarComoInterno('administrador-holding', 'empresa-1', 'Admin Italmod');
     // MOCK_GIFTCARDS trae 2 giftcards con campanaId: 'campana-1' (ids '1' y '2').
-    accesoExternoService.crear({ nombre: 'DOT Solutions', recurso: { tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2099-01-01' } });
+    accesoExternoService.crear({ nombre: 'DOT Solutions', email: 'compras@dotsolutions.io', recurso: { tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2099-01-01' } });
     const [acceso] = accesoExternoService.accesosDeHoldingActivo();
 
     sesionService.entrarComoCompradorExterno(acceso.id, 'DOT Solutions');
@@ -59,7 +59,7 @@ describe('GiftcardService — alcance por holding', () => {
 
   it('giftcardsDelAccesoExterno queda vacío si el recurso otorgado ya venció', () => {
     sesionService.entrarComoInterno('administrador-holding', 'empresa-1', 'Admin Italmod');
-    accesoExternoService.crear({ nombre: 'DOT Solutions', recurso: { tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2000-01-01' } });
+    accesoExternoService.crear({ nombre: 'DOT Solutions', email: 'compras@dotsolutions.io', recurso: { tipoRecurso: 'lote_giftcard', idRecurso: 'campana-1', fechaExpiracion: '2000-01-01' } });
     const [acceso] = accesoExternoService.accesosDeHoldingActivo();
 
     sesionService.entrarComoCompradorExterno(acceso.id, 'DOT Solutions');

@@ -1,4 +1,7 @@
+<p-toast [baseZIndex]="9999" />
+
 <div class="shell">
+  @if (mostrarSidebar()) {
   <aside class="shell-nav">
     <app-sesion-switcher />
 
@@ -52,8 +55,9 @@
       </nav>
     }
   </aside>
+  }
 
-  <main class="shell-contenido">
+  <main class="shell-contenido" [class.shell-contenido--con-padding]="mostrarSidebar()">
     <router-outlet />
   </main>
 </div>

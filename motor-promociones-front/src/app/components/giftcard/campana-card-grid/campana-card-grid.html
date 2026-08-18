@@ -1,18 +1,15 @@
 <div class="campana-grid-page">
-  <div class="campana-grid-header">
-    <h2 class="campana-grid-titulo">{{ verArchivadas() ? 'Campañas archivadas' : 'Campañas' }}</h2>
-    <div class="campana-grid-acciones">
-      <p-button
-        [label]="verArchivadas() ? 'Ver activas' : 'Ver archivadas'"
-        [icon]="verArchivadas() ? 'pi pi-arrow-left' : 'pi pi-inbox'"
-        [outlined]="true"
-        (onClick)="verArchivadas.set(!verArchivadas())"
-      />
-      @if (!verArchivadas() && sesionService.puedeAdministrarGiftcards()) {
-        <p-button label="Crear campaña" icon="pi pi-plus" (onClick)="modalCrearVisible.set(true)" />
-      }
-    </div>
-  </div>
+  <app-page-header [titulo]="verArchivadas() ? 'Campañas archivadas' : 'Campañas'">
+    <p-button
+      [label]="verArchivadas() ? 'Ver activas' : 'Ver archivadas'"
+      [icon]="verArchivadas() ? 'pi pi-arrow-left' : 'pi pi-inbox'"
+      [outlined]="true"
+      (onClick)="verArchivadas.set(!verArchivadas())"
+    />
+    @if (!verArchivadas() && sesionService.puedeAdministrarGiftcards()) {
+      <p-button label="Crear campaña" icon="pi pi-plus" (onClick)="modalCrearVisible.set(true)" />
+    }
+  </app-page-header>
 
   @if (cargando()) {
     <div class="campana-grid">

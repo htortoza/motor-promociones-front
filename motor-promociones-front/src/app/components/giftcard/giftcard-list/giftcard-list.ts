@@ -19,6 +19,7 @@ import { GiftcardCreateModal } from '../giftcard-create-modal/giftcard-create-mo
 import { GiftcardDetailDrawer } from '../giftcard-detail-drawer/giftcard-detail-drawer';
 import { GiftcardInformePanel } from '../giftcard-informe-panel/giftcard-informe-panel';
 import { CampanaCardGrid } from '../campana-card-grid/campana-card-grid';
+import { PageHeader } from '../../shared/page-header/page-header';
 
 type FiltroEstado = GiftcardEstado | 'todos';
 type Vista = 'lista' | 'campanas';
@@ -73,6 +74,7 @@ const OPCIONES_ESTADO: { label: string; value: FiltroEstado }[] = [
     GiftcardDetailDrawer,
     GiftcardInformePanel,
     CampanaCardGrid,
+    PageHeader,
   ],
   templateUrl: './giftcard-list.html',
   styleUrl: './giftcard-list.css',

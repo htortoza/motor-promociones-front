@@ -1,4 +1,4 @@
-<p-drawer [(visible)]="visible" position="right" header="Detalle de giftcard" [style]="{ width: '520px' }" (onHide)="cerrar()">
+<p-drawer [(visible)]="visible" appendTo="body" position="right" header="Detalle de giftcard" [style]="{ width: '520px' }" (onHide)="cerrar()">
   @if (giftcard()) {
     <div class="detalle-body">
       <div class="detalle-encabezado">

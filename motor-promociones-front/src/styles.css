@@ -12,3 +12,107 @@ body {
 .p-tag {
   font-weight: 400;
 }
+
+/* El grupo "root" por defecto del browser haría un cross-fade de TODA la página vieja contra TODA la
+   página nueva — al pasar de login (sin sidebar) al shell (con sidebar), eso se ve como que la sidebar
+   aparece a medias/parpadea mientras el resto se desvanece. Lo apagamos y animamos cada parte a mano
+   con nombres propios, para que cada transición tenga sentido según lo que realmente cambia. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Todas las duraciones de este archivo comparten el mismo valor a propósito: login, sidebar y contenido
+   animan en paralelo durante la misma transición, y si una termina antes que las otras, se nota (ej. la
+   sidebar apareciendo antes de que el login termine de desvanecerse). */
+:root {
+  --duracion-transicion-pantalla: 0.32s;
+}
+
+/* Transición fluida al cambiar de módulo dentro del shell (ej. Giftcards → Accesos Externos). Solo el
+   contenido principal lleva este nombre — la sidebar nunca lo tiene, así que nunca parpadea. */
+::view-transition-old(pagina-principal),
+::view-transition-new(pagina-principal) {
+  animation-duration: var(--duracion-transicion-pantalla);
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(pagina-principal) {
+  animation-name: pagina-principal-salida;
+}
+
+::view-transition-new(pagina-principal) {
+  animation-name: pagina-principal-entrada;
+}
+
+@keyframes pagina-principal-salida {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+}
+
+@keyframes pagina-principal-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+}
+
+/* El login y el shell tienen layouts completamente distintos (uno no tiene sidebar) — nunca deben
+   compartir nombre con .pagina-principal, o el navegador intenta "morphear" una caja en la otra (squish
+   feo). Un desvanecimiento simple, sin mover ni escalar nada, es lo que tiene sentido para saltar de
+   una pantalla a otra completamente diferente. */
+::view-transition-old(pantalla-login),
+::view-transition-new(pantalla-login) {
+  animation-duration: var(--duracion-transicion-pantalla);
+  animation-timing-function: ease-in-out;
+}
+
+::view-transition-old(pantalla-login) {
+  animation-name: pantalla-login-salida;
+}
+
+::view-transition-new(pantalla-login) {
+  animation-name: pantalla-login-entrada;
+}
+
+@keyframes pantalla-login-salida {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pantalla-login-entrada {
+  from {
+    opacity: 0;
+  }
+}
+
+/* La sidebar aparece o desaparece junto con la pantalla de login — mismo desvanecimiento simple, sin
+   nombre propio de keyframes: reusa las mismas de pantalla-login. */
+::view-transition-old(shell-nav),
+::view-transition-new(shell-nav) {
+  animation-duration: var(--duracion-transicion-pantalla);
+  animation-timing-function: ease-in-out;
+}
+
+::view-transition-old(shell-nav) {
+  animation-name: pantalla-login-salida;
+}
+
+::view-transition-new(shell-nav) {
+  animation-name: pantalla-login-entrada;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(pagina-principal),
+  ::view-transition-new(pagina-principal),
+  ::view-transition-old(pantalla-login),
+  ::view-transition-new(pantalla-login),
+  ::view-transition-old(shell-nav),
+  ::view-transition-new(shell-nav) {
+    animation: none;
+  }
+}

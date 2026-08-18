@@ -63,4 +63,13 @@ describe('GiftcardDetailDrawer — gating por rol', () => {
     fixture.detectChanges();
     expect(component.puedeActivar()).toBe(true);
   });
+
+  it('una giftcard agotada no admite ninguna acción — ya cumplió su ciclo', () => {
+    sesionService.entrarComoInterno('administrador-holding', 'empresa-1', 'Admin Italmod');
+    fixture.componentRef.setInput('giftcard', { ...GIFTCARD_ACTIVA, saldo: 0 });
+    fixture.detectChanges();
+    expect(component.puedeActivar()).toBe(false);
+    expect(component.puedeBloquear()).toBe(false);
+    expect(component.puedeReiniciarActivacion()).toBe(false);
+  });
 });

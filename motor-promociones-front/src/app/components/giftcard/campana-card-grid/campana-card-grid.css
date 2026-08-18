@@ -4,24 +4,6 @@
   gap: 16px;
 }
 
-.campana-grid-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.campana-grid-titulo {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--p-text-color);
-}
-
-.campana-grid-acciones {
-  display: flex;
-  gap: 8px;
-}
-
 .campana-grid-vacio {
   color: var(--p-text-muted-color);
   font-size: 0.9rem;

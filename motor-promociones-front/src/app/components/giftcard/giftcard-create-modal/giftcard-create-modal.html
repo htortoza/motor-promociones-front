@@ -2,6 +2,7 @@
   [(visible)]="visible"
   [modal]="true"
   [closable]="true"
+  [draggable]="false"
   header="Crear giftcard"
   [style]="{ width: '480px' }"
   (onHide)="cerrar()"
@@ -13,35 +14,31 @@
     </div>
 
     <div class="campo-grupo">
-      <span class="campo-etiqueta">Tipo de monto</span>
-      <p-selectButton [options]="opcionesTipoMonto" optionLabel="label" optionValue="value" [ngModel]="tipoMonto()" (ngModelChange)="tipoMonto.set($event)" />
-    </div>
-
-    <div class="campo-grupo">
       <span class="campo-etiqueta">Canal</span>
       <p-selectButton [options]="opcionesCanal" optionLabel="label" optionValue="value" [ngModel]="canal()" (ngModelChange)="canal.set($event)" />
     </div>
 
-    @if (tipoMonto() === 'fijo') {
-      <div class="campo-grupo">
-        <label class="campo-etiqueta" for="monto-fijo">Monto</label>
-        <p-inputNumber
-          inputId="monto-fijo"
-          mode="currency"
-          currency="CLP"
-          locale="es-CL"
-          [maxFractionDigits]="0"
-          [ngModel]="montoFijo()"
-          (ngModelChange)="montoFijo.set($event)"
-          fluid
-        />
-      </div>
-    } @else {
-      <p class="sin-datos">Sin monto por ahora — se asigna al activar el código, cuando el cliente define el valor exacto de la venta.</p>
-    }
-
     @if (modo() === 'individual') {
+      <div class="campo-grupo">
+        <span class="campo-etiqueta">Tipo de monto</span>
+        <p-selectButton [options]="opcionesTipoMonto" optionLabel="label" optionValue="value" [ngModel]="tipoMonto()" (ngModelChange)="tipoMonto.set($event)" />
+      </div>
+
       @if (tipoMonto() === 'fijo') {
+        <div class="campo-grupo">
+          <label class="campo-etiqueta" for="monto-fijo">Monto</label>
+          <p-inputNumber
+            inputId="monto-fijo"
+            mode="currency"
+            currency="CLP"
+            locale="es-CL"
+            [maxFractionDigits]="0"
+            [ngModel]="montoFijo()"
+            (ngModelChange)="montoFijo.set($event)"
+            fluid
+          />
+        </div>
+
         <div class="campo-grupo campo-checkbox">
           <p-checkbox
             inputId="solo-vigente"
@@ -51,6 +48,8 @@
           />
           <label for="solo-vigente">Crear solo como vigente (sin activar)</label>
         </div>
+      } @else {
+        <p class="sin-datos">Sin monto por ahora — se asigna al activar el código, cuando el cliente define el valor exacto de la venta.</p>
       }
     } @else {
       @if (campanas().length === 0) {
@@ -65,14 +64,56 @@
             optionValue="id"
             placeholder="Selecciona una campaña"
             [ngModel]="campanaId()"
-            (ngModelChange)="campanaId.set($event)"
+            (ngModelChange)="onCampanaSeleccionada($event)"
             [fluid]="true"
           />
         </div>
 
+        @if (campanaId()) {
+          @switch (politica()?.tipo) {
+            @case ('abierto') {
+              <p class="sin-datos">Campaña de monto abierto — cada código se cobra según lo que gaste el cliente, definido al activarlo.</p>
+            }
+            @case ('fijo-unico') {
+              <p class="sin-datos">Monto fijo de esta campaña: {{ montoFijoEfectivo() | currency: 'CLP' : 'symbol' : '1.0-0' }}</p>
+            }
+            @case ('fijo-tiers') {
+              <div class="campo-grupo">
+                <label class="campo-etiqueta" for="denominacion-lote">Denominación</label>
+                <p-select
+                  inputId="denominacion-lote"
+                  [options]="tiersConDisponibilidad()"
+                  optionLabel="monto"
+                  optionValue="monto"
+                  placeholder="Selecciona un monto"
+                  [ngModel]="denominacionElegida()"
+                  (ngModelChange)="denominacionElegida.set($event)"
+                  [fluid]="true"
+                >
+                  <ng-template let-tier pTemplate="item">
+                    {{ tier.monto | currency: 'CLP' : 'symbol' : '1.0-0' }} — {{ tier.disponible }} disponible(s) de {{ tier.cantidad }}
+                  </ng-template>
+                </p-select>
+              </div>
+            }
+          }
+
+          <p class="cupo-info" [class.cupo-agotado]="cupoMaximoParaCantidad() === 0">
+            Cupo disponible {{ politica()?.tipo === 'fijo-tiers' ? 'para esta denominación' : 'en esta campaña' }}: {{ cupoMaximoParaCantidad() ?? 0 }}
+            código(s)
+          </p>
+        }
+
         <div class="campo-grupo">
           <label class="campo-etiqueta" for="cantidad-lote">Cantidad de códigos</label>
-          <p-inputNumber inputId="cantidad-lote" [min]="1" [ngModel]="cantidadLote()" (ngModelChange)="cantidadLote.set($event)" fluid />
+          <p-inputNumber
+            inputId="cantidad-lote"
+            [min]="1"
+            [max]="cupoMaximoParaCantidad() ?? undefined"
+            [ngModel]="cantidadLote()"
+            (ngModelChange)="cantidadLote.set($event)"
+            fluid
+          />
         </div>
 
         <p-message severity="info" styleClass="aviso-antifraude">
